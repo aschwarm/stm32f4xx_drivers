@@ -1,6 +1,7 @@
-"./Src/005button_interupt.o"
+"./Src/011i2c_master_rx_testing.o"
 "./Src/syscalls.o"
 "./Src/sysmem.o"
 "./Startup/startup_stm32f407vgtx.o"
 "./drivers/Src/stm32f407_gpio_driver.o"
+"./drivers/Src/stm32f407_i2c_driver.o"
 "./drivers/Src/stm32f407_spi_driver.o"

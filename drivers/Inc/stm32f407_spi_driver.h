@@ -82,9 +82,9 @@ typedef struct{
 #define SPI_SSM_EN		1
 #define SPI_SSM_DI		0
 
-#define SPI_TXE_FLAG	(1 << SPI_SR_TXE)
-#define SPI_RXNE_FLAG 	(1 << SPI_SR_RXNE)
-#define SPI_BUSY_FLAG	(1 << SPI_SR_BSY)
+#define SPI_FLAG_TXE	(1 << SPI_SR_TXE)
+#define SPI_FLAG_RXNE 	(1 << SPI_SR_RXNE)
+#define SPI_FLAG_BUSY	(1 << SPI_SR_BSY)
 
 #define SPI_CR1_DFF		11
 
@@ -97,6 +97,11 @@ typedef struct{
 
 #define SPI_SR_OVR			6
 #define SPI_CR2_ERRIE		5
+
+
+#define SPI_CR1_SPE			6
+#define SPI_CR1_SSI			8
+#define SPI_CR2_SSOE		2
 
 // Possible SPI Application events
 #define SPI_EVENT_TX_CMPLT		1

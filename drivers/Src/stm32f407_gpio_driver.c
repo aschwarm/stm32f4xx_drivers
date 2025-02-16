@@ -93,6 +93,8 @@ void GPIO_Init(GPIO_Handle_t *pGPIOHandle)
 {
 	uint32_t temp = 0;
 
+	GPIO_PeriClckCtrl(pGPIOHandle->pGPIOx, ENABLE);
+
 	//1. Configure the mode
 	if(pGPIOHandle->GPIO_PinConfig.GPIO_PinMode <= GPIO_MODE_ANALOG)
 	{
@@ -165,7 +167,7 @@ void GPIO_Init(GPIO_Handle_t *pGPIOHandle)
 
 		temp1 = pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber / 8;
 		temp2 = pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber % 8;
-		pGPIOHandle->pGPIOx->AFR[temp1] &= (0xF << (4 * temp2));
+		pGPIOHandle->pGPIOx->AFR[temp1] &= ~(0xF << (4 * temp2));
 		pGPIOHandle->pGPIOx->AFR[temp1] |= pGPIOHandle->GPIO_PinConfig.GPIO_PinAltFunMode << (4* temp2);
 
 	}

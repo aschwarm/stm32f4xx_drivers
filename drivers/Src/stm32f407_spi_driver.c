@@ -65,6 +65,8 @@ void SPI_Init(SPI_Handle_t *pSPIHandle)
 	//first lets configure the SPI_CR1 register
 	uint32_t tempreg = 0;
 
+	SPI_PeriClckCtrl(pSPIHandle->pSPIx,ENABLE);
+
 	//1. configure the device mode
 	tempreg |= pSPIHandle->SPIConfig.SPI_DeviceMode << 2;
 
@@ -96,6 +98,9 @@ void SPI_Init(SPI_Handle_t *pSPIHandle)
 
 	// 6. configure the CPHA
 	tempreg |= pSPIHandle->SPIConfig.SPI_CPHA << 0;
+
+	//7. configure the SSM
+	tempreg |= pSPIHandle->SPIConfig.SPI_SSM << 9;
 
 	pSPIHandle->pSPIx->CR1 = tempreg;
 
@@ -140,7 +145,7 @@ void SPI_SendData(SPI_RegDef_t *pSPIx,uint8_t *pTxBuffer, uint32_t Len)
 	while(Len > 0)
 	{
 		//1. wait until TXE is set
-		while(SPI_GetFlagStatus(pSPIx, SPI_TXE_FLAG) == FLAG_RESET);
+		while(SPI_GetFlagStatus(pSPIx, SPI_FLAG_TXE) == FLAG_RESET);
 
 		//2. Check the DFF bit in CR1
 		if(pSPIx->CR1 & (1 << SPI_CR1_DFF))
@@ -154,7 +159,7 @@ void SPI_SendData(SPI_RegDef_t *pSPIx,uint8_t *pTxBuffer, uint32_t Len)
 		}else
 		{
 			//8 bit DFF
-			pSPIx->DR = *(pTxBuffer);
+			pSPIx->DR = *pTxBuffer;
 			Len--;
 			pTxBuffer++;
 		}
@@ -166,7 +171,7 @@ void SPI_ReceiveData(SPI_RegDef_t *pSPIx, uint8_t *pRxBuffer, uint32_t Len)
 	while(Len > 0)
 	{
 		//1. wait unit RXNE is set
-		while(SPI_GetFlagStatus(pSPIx, SPI_RXNE_FLAG) == FLAG_RESET );
+		while(SPI_GetFlagStatus(pSPIx, SPI_FLAG_RXNE) == FLAG_RESET );
 
 		//2. Check the DFF bit in CR1
 		if(pSPIx->CR1 & (1 << SPI_CR1_DFF))
@@ -188,6 +193,38 @@ void SPI_ReceiveData(SPI_RegDef_t *pSPIx, uint8_t *pRxBuffer, uint32_t Len)
 	}
 }
 
+void SPI_PeripheralControl(SPI_RegDef_t *pSPIx, uint8_t EnOrDi)
+{
+	if(EnOrDi == ENABLE)
+	{
+		pSPIx->CR1 |= (1 << SPI_CR1_SPE);
+	}else
+	{
+		pSPIx->CR1 &= ~(1 << SPI_CR1_SPE);
+	}
+}
+
+void SPI_SSIConfig(SPI_RegDef_t *pSPIx, uint8_t EnOrDi)
+{
+	if(EnOrDi == ENABLE)
+	{
+		pSPIx->CR1 |= (1 << SPI_CR1_SSI);
+	}else
+	{
+		pSPIx->CR1 &= ~(1 << SPI_CR1_SSI);
+	}
+}
+
+void SPI_SSOEConfig(SPI_RegDef_t *pSPIx, uint8_t EnOrDi)
+{
+	if(EnOrDi == ENABLE)
+	{
+		pSPIx->CR1 |= (1 << SPI_CR2_SSOE);
+	}else
+	{
+		pSPIx->CR1 &= ~(1 << SPI_CR2_SSOE);
+	}
+}
 
 uint8_t SPI_SendDataIT(SPI_Handle_t *pSPIHandle,uint8_t *pTxBuffer, uint32_t Len)
 {
@@ -238,11 +275,52 @@ uint8_t SPI_ReceiveDataIT(SPI_Handle_t *pSPIHandle, uint8_t *pRxBuffer, uint32_t
 void SPI_IRQInteruptConfig(uint8_t IRQNumber, uint8_t EnOrDi)
 {
 
+	if(EnOrDi == ENABLE)
+	{
+		if(IRQNumber <= 31)
+		{
+			//program ISER0 register
+			*NVIC_ISER0 |= ( 1 << IRQNumber );
+
+		}else if(IRQNumber > 31 && IRQNumber < 64 ) //32 to 63
+		{
+			//program ISER1 register
+			*NVIC_ISER1 |= ( 1 << (IRQNumber % 32) );
+		}
+		else if(IRQNumber >= 64 && IRQNumber < 96 )
+		{
+			//program ISER2 register //64 to 95
+			*NVIC_ISER3 |= ( 1 << (IRQNumber % 64) );
+		}
+	}else
+	{
+		if(IRQNumber <= 31)
+		{
+			//program ICER0 register
+			*NVIC_ICER0 |= ( 1 << IRQNumber );
+		}else if(IRQNumber > 31 && IRQNumber < 64 )
+		{
+			//program ICER1 register
+			*NVIC_ICER1 |= ( 1 << (IRQNumber % 32) );
+		}
+		else if(IRQNumber >= 6 && IRQNumber < 96 )
+		{
+			//program ICER2 register
+			*NVIC_ICER3 |= ( 1 << (IRQNumber % 64) );
+		}
+	}
+
 }
 
 void SPI_IRQPriorityConfig(uint8_t IRQNumber, uint32_t IRQPriority)
 {
+	//1. first lets find out the ipr register
+	uint8_t iprx = IRQNumber / 4;
+	uint8_t iprx_section  = IRQNumber %4 ;
 
+	uint8_t shift_amount = ( 8 * iprx_section) + ( 8 - NO_PR_BITS_IMPLEMENTED) ;
+
+	*(  NVIC_PR_BASE_ADDR + iprx ) |=  ( IRQPriority << shift_amount );
 }
 
 void SPI_IRQHandling(SPI_Handle_t *pHandle)
