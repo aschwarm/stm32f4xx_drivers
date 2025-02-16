@@ -1,4 +1,4 @@
-Peripheral drivers for STM32F407.
+Bare metal peripheral drivers for STM32F407.
 Includes drivers for:
 - GPIO
 - SPI
