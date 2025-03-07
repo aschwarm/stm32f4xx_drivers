@@ -8,20 +8,6 @@
 #include "stm32f407_usart_driver.h"
 
 
-/*********************************************************************
- * @fn      		  - USART_SetBaudRate
- *
- * @brief             -
- *
- * @param[in]         -
- * @param[in]         -
- * @param[in]         -
- *
- * @return            -
- *
- * @Note              -
-
- */
 void USART_SetBaudRate(USART_RegDef_t *pUSARTx, uint32_t BaudRate)
 {
 
