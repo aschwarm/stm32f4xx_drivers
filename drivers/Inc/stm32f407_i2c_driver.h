@@ -21,8 +21,16 @@ typedef struct
 
 typedef struct
 {
-	I2C_RegDef_t *pI2Cx;
-	I2C_Config_t I2C_Config;
+	I2C_RegDef_t 	*pI2Cx;
+	I2C_Config_t	 I2C_Config;
+	uint8_t			*pTxBuffer;
+	uint8_t			*pRxBuffer;
+	uint32_t		TxLen;
+	uint32_t		RxLen;
+	uint8_t			TxRxState;
+	uint8_t			DevAddr;
+	uint32_t		RxSize;
+	uint8_t			Sr;
 
 } I2C_Handle_t;
 
@@ -48,6 +56,13 @@ typedef struct
 #define I2C_FM_DUTY_16_9	1
 
 /*
+ * I2C application states
+ */
+#define I2C_READY			0
+#define I2C_BUSY_IN_RX		1
+#define I2C_BUSY_IN_TX		2
+
+/*
  * I2C related status flags definitions
  */
 #define I2C_FLAG_TXE		(1 << I2C_SR1_TXE)
@@ -65,6 +80,21 @@ typedef struct
 
 #define I2C_DISABLE_REPEAT_START		RESET
 #define I2C_ENABLE_REPEAT_START			SET
+
+/*
+ * I2C application events macros
+ */
+#define I2C_EV_TX_CMPLT		0
+#define	I2C_EV_RX_CMPLT		1
+#define I2C_EV_STOP			2
+#define I2C_ERROR_BERR		3
+#define I2C_ERROR_ARLO		4
+#define I2C_ERROR_AF		5
+#define I2C_ERROR_OVR		6
+#define I2C_ERROR_TIMEOUT	7
+#define I2C_EV_DATA_REQ		8
+#define	I2C_EV_DATA_RCV		9
+
 
 /*****************************************************************
  * 						APIs supported by this driver
@@ -88,11 +118,22 @@ void I2C_DeInit(I2C_RegDef_t *pI2Cx);
 void I2C_MasterSendData(I2C_Handle_t *pI2CHandle, uint8_t *pTxbuffer, uint32_t Len, uint8_t SlaveAddr, uint8_t RepeatStart);
 void I2C_MasterReceiveData(I2C_Handle_t *pI2CHandle, uint8_t *pRxbuffer, uint32_t Len, uint8_t SlaveAddr, uint8_t RepeatStart);
 
+uint8_t I2C_MasterSendDataIT(I2C_Handle_t *pI2CHandle, uint8_t *pTxbuffer, uint32_t Len, uint8_t SlaveAddr, uint8_t RepeatStart);
+uint8_t I2C_MasterReceiveDataIT(I2C_Handle_t *pI2CHandle, uint8_t *pRxbuffer, uint32_t Len, uint8_t SlaveAddr, uint8_t RepeatStart);
+
+void I2C_CloseReceiveData(I2C_Handle_t *pI2CHandle);
+void I2C_CloseSendData(I2C_Handle_t *pI2CHandle);
+
+void I2C_SlaveSendData(I2C_RegDef_t *pI2C,uint8_t data);
+uint8_t I2C_SlaveReceiveData(I2C_RegDef_t *pI2C);
+
 /*
  * IRQ Configuration and ISR handling
  */
 void I2C_IRQInteruptConfig(uint8_t IRQNumber, uint8_t EnOrDi);
 void I2C_IRQPriorityConfig(uint8_t IRQNumber, uint32_t IRQPriority);
+void I2C_EV_IRQHandling(I2C_Handle_t *pI2CHandle);
+void I2C_ER_IRQHandling(I2C_Handle_t *pI2CHandle);
 
 /*
  * Other Peripheral Control APIs
@@ -101,7 +142,9 @@ void I2C_PeripheralControl(I2C_RegDef_t *pI2Cx, uint8_t EnOrDi);
 uint8_t I2C_GetFlagStatus(I2C_RegDef_t *pI2Cx, uint32_t FlagName);
 uint32_t RCC_GetPCLK1Value(void);
 void I2C_ManageAcking(I2C_RegDef_t *pI2Cx, uint8_t EnOrDi);
+void I2C_GenerateStopCondition(I2C_RegDef_t *pI2Cx);
 
+void I2C_SlaveEnableDisableCallbackEvent(I2C_RegDef_t *pI2Cx, uint8_t EnOrDi);
 
 // Application callback
 __weak void I2C_ApplicationEventCallback(I2C_Handle_t *pI2CHandle, uint8_t AppEv);
