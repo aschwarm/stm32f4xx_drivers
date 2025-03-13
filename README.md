@@ -2,7 +2,6 @@
 
 This repo contains notes and programming assignments for the Udemy's "Mastering Microcontroller and Embedded Driver Development (MCU1)" course by FastBit Embedded Brain Academy.
 
-Date: August, 2019. Date Updated (STM32CubeIDE): July, 2023.
 
 The course is instructed by Engineer Kiran Nayak.
 
