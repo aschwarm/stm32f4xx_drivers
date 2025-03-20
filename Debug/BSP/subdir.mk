@@ -5,29 +5,26 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
-../Src/017rtc_lcd.c \
-../Src/syscalls.c \
-../Src/sysmem.c 
+../BSP/ds1307.c \
+../BSP/lcd.c 
 
 OBJS += \
-./Src/017rtc_lcd.o \
-./Src/syscalls.o \
-./Src/sysmem.o 
+./BSP/ds1307.o \
+./BSP/lcd.o 
 
 C_DEPS += \
-./Src/017rtc_lcd.d \
-./Src/syscalls.d \
-./Src/sysmem.d 
+./BSP/ds1307.d \
+./BSP/lcd.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes
-Src/%.o Src/%.su Src/%.cyclo: ../Src/%.c Src/subdir.mk
+BSP/%.o BSP/%.su BSP/%.cyclo: ../BSP/%.c BSP/subdir.mk
 	arm-none-eabi-gcc "$<" -mcpu=cortex-m4 -std=gnu11 -g3 -DDEBUG -DSTM32 -DSTM32F407G_DISC1 -DSTM32F4 -DSTM32F407VGTx -c -I../Inc -I"C:/Users/adams/source/Embedded-C/My_workspace/target/stm32f4xx_drivers/drivers/Inc" -I"C:/Users/adams/source/Embedded-C/My_workspace/target/stm32f4xx_drivers/BSP" -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"$(@:%.o=%.d)" -MT"$@" --specs=nano.specs -mfloat-abi=hard -mthumb -o "$@"
 
-clean: clean-Src
+clean: clean-BSP
 
-clean-Src:
-	-$(RM) ./Src/017rtc_lcd.cyclo ./Src/017rtc_lcd.d ./Src/017rtc_lcd.o ./Src/017rtc_lcd.su ./Src/syscalls.cyclo ./Src/syscalls.d ./Src/syscalls.o ./Src/syscalls.su ./Src/sysmem.cyclo ./Src/sysmem.d ./Src/sysmem.o ./Src/sysmem.su
+clean-BSP:
+	-$(RM) ./BSP/ds1307.cyclo ./BSP/ds1307.d ./BSP/ds1307.o ./BSP/ds1307.su ./BSP/lcd.cyclo ./BSP/lcd.d ./BSP/lcd.o ./BSP/lcd.su
 
-.PHONY: clean-Src
+.PHONY: clean-BSP
 

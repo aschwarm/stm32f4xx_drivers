@@ -1,4 +1,6 @@
-"./Src/015uart_tx.o"
+"./BSP/ds1307.o"
+"./BSP/lcd.o"
+"./Src/017rtc_lcd.o"
 "./Src/syscalls.o"
 "./Src/sysmem.o"
 "./Startup/startup_stm32f407vgtx.o"
